@@ -1,13 +1,26 @@
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import F
+
+from .forms import CustomerForm
 from django.utils import timezone, dateformat
+from django.contrib import messages
 
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from core.models import Employee, Customer, CustomerAssignment, FinanceApplication, Loan, EmployeeKPI, Commission, Installment
 
 
 @login_required
 def dashboard_main(request):
+    form = CustomerForm()
+    if request.method == "POST":
+        form = CustomerForm(request.POST)
+        if form.is_valid():
+            messages.success(request, 'Customer added successfully.')
+            form.save()
+            return redirect('main-dashboard')
 
     # -------------------------------------------- Employee Details -------------------------------------------------#
 
@@ -78,13 +91,25 @@ def dashboard_main(request):
 
     all_loans = Loan.objects.filter(
         finance_id__user_id__in=user_ids
+    ).select_related('finance_id__user_id').annotate(
+        customer_name=F('finance_id__user_id__full_name'),
+    ).values(
+        'loan_id',
+        'disbursed_amount',
+        'interest_rate',
+        'installment_amount',
+        'outstanding_balance',
+        'tenure',
+        'loan_status',
+        'dpd_count',
+        'customer_name',
     )
 
     delayed_loans = [
-        loan for loan in all_loans if loan.loan_status == 'Delayed']
+        loan for loan in all_loans if loan['loan_status'] == 'Delayed']
 
     # -------------------------------------------- Installments -------------------------------------------------#
-    loan_ids = [l.loan_id for l in all_loans]
+    loan_ids = [l['loan_id'] for l in all_loans]
 
     employee_installments = Installment.objects.filter(loan_id__in=loan_ids)
 
@@ -112,8 +137,19 @@ def dashboard_main(request):
 
     # -------------------------------------------- Commis sions -------------------------------------------------#
 
-    commissions = Commission.objects.filter(employee_id=employee.employee_id)
-    total_earned = sum([comm.amount for comm in commissions])
+    # commissions = Commission.objects.filter(employee_id=employee.employee_id)
+
+    commissions = Commission.objects.filter(
+        loan_id__finance_id__user_id__in=user_ids
+    ).select_related('loan_id__finance_id__user_id').annotate(
+        customer_name=F('loan_id__finance_id__user_id__full_name'),
+    ).values(
+        'loan_id',
+        'amount',
+        'customer_name',
+    )
+
+    total_earned = sum([comm['amount'] for comm in commissions])
     total_earned = f"{int(total_earned):,}"
     # commission_table = [
     #     {
@@ -156,7 +192,7 @@ def dashboard_main(request):
         'employee_active_customers_rate': round(active_customers_count/customer_count * 100, 2) if customer_count else 0,
         'employee_customer_chart_data': customers_chart_data,
         'employee_kpi_chart_data': employee_kpi_chart_data,
-        # 'all_loans': all_loans,
+        'all_loans': json.dumps(list(all_loans), cls=DjangoJSONEncoder),
         # 'delayed_loans': delayed_loans,
         'delayed_loans_count': len(delayed_loans),
 
@@ -167,10 +203,12 @@ def dashboard_main(request):
 
         'kpi_record': kpi_record,
 
-        'commissions': commissions,
+        'commissions': json.dumps(list(commissions), cls=DjangoJSONEncoder),
         'total_earned': total_earned,
         'total_commissions': commissions.__len__,
 
+        'form': form,
+        'show_add_customer': request.method == 'POST' and not form.is_valid(),
     }
 
     return render(request, 'main_dashboard/main_dashboard.html', context)

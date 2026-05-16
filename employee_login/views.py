@@ -11,6 +11,9 @@ def employee_login(request):
 
         if user is not None:
             login(request, user)
+            if user.is_superuser:
+                return redirect('/admin/')
+
             return redirect('main-dashboard')
             # return redirect('main-dashboard-home')
         else:

@@ -85,7 +85,7 @@ class Customer(models.Model):
         ('Active', 'Active'),
         ('Rejected', 'Rejected'),
     ]
-    user_id = models.IntegerField(primary_key=True)
+    user_id = models.AutoField(primary_key=True)
     full_name = models.CharField(max_length=255)
     national_id = models.CharField(max_length=20, unique=True)
     phone = models.CharField(max_length=20)
@@ -162,6 +162,9 @@ class Loan(models.Model):
 
     disbursed_amount = models.FloatField()
     interest_rate = models.FloatField()
+    installment_amount = models.FloatField()
+    tenure = models.IntegerField()
+    outstanding_balance = models.FloatField()
 
     loan_status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     dpd_count = models.IntegerField(default=0)

@@ -230,13 +230,77 @@
   .alert-strip { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 13px; }
   .alert-warn  { background: var(--amber-light); color: var(--amber); border-left: 3px solid var(--amber-mid); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
   .alert-danger{ background: var(--red-light);   color: var(--red);   border-left: 3px solid var(--red-mid);   border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
-
+  .alert-success { 
+    background: var(--teal-light); 
+    color: var(--teal); 
+    border-left: 3px solid var(--teal-mid); 
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0; 
+  }
   /* ── Chart wrapper ── */
   .chart-wrap { position: relative; width: 100%; }
 
   /* ── Mono numbers ── */
   .mono { font-family: 'DM Mono', monospace; }
   
+
+  /* ── Add Customer Form ── */
+  #add-customer-form p {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 18px;
+  }
+  #add-customer-form p:last-of-type { margin-bottom: 0; }
+  #add-customer-form label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 6px;
+  }
+  #add-customer-form input[type="text"],
+  #add-customer-form input[type="number"],
+  #add-customer-form input[type="email"],
+  #add-customer-form select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border-med);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+  #add-customer-form input[type="number"] { font-family: 'DM Mono', monospace; }
+  #add-customer-form input:focus,
+  #add-customer-form select:focus {
+    border-color: var(--teal-mid);
+    box-shadow: 0 0 0 3px var(--teal-light);
+    background: var(--surface);
+  }
+  #add-customer-form select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239a9a94' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 32px;
+  }
+  #add-customer-form ul.errorlist { list-style: none; margin-top: 5px; padding: 0; }
+  #add-customer-form ul.errorlist li {
+    font-size: 12px;
+    color: var(--red);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  #add-customer-form ul.errorlist li::before {
+    content: '\ea0e';
+    font-family: 'tabler-icons';
+    font-size: 13px;
+  }
+
   {% comment %} body {
         transform: scale(1.5);
         transform-origin: 0 0;
@@ -281,7 +345,9 @@
     </button>
     <button class="nav-item" onclick="showPage('loans')">
       <i class="ti ti-file-invoice"></i> Loans
-      <span class="nav-badge">3</span>
+      {% if delayed_loans_count > 0 %}
+        <span class="nav-badge">{{ delayed_loans_count }}</span>
+      {% endif %}
     </button>
 
     <div class="nav-section">Performance</div>
@@ -293,9 +359,9 @@
     </button>
 
     <div class="nav-section">Account</div>
-    <button class="nav-item">
+    {% comment %} <button class="nav-item">
       <i class="ti ti-settings"></i> Settings
-    </button>
+    </button> {% endcomment %}
     <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
       {% csrf_token %}
     </form>
@@ -325,7 +391,13 @@
     <i class="ti ti-alert-triangle"></i>
     <strong>3 delayed loans</strong> in your portfolio require follow-up. DPD ranges from 5 to 15 days.
   </div> {% endcomment %}
-
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert-strip alert-success" id="flash-message">
+        <i class="ti ti-circle-check"></i> {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
   <div class="section-label">My portfolio</div>
   <div class="metric-grid">
     <div class="metric">
@@ -426,8 +498,8 @@
       <div class="page-sub">{{ customer_count }} customers</div>
     </div>
     <div class="header-actions">
-      <button class="btn"><i class="ti ti-filter"></i> Filter</button>
-      <button class="btn btn-primary"><i class="ti ti-plus"></i> New customer</button>
+      {% comment %} <button class="btn"><i class="ti ti-filter"></i> Filter</button> {% endcomment %}
+      <button class="btn btn-primary" onclick="showPage('addCustomerSection')"><i class="ti ti-plus"></i> New customer</button>
     </div>
   </div>
 
@@ -472,6 +544,90 @@
       </table>
     </div>
   </div>
+</div>
+<!-- ══════════════════════ PAGE: ADD CUSTOMER ══════════════════════ -->
+<div id="page-addCustomerSection" class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">New Customer</div>
+      <div class="page-sub">Fill in the details below to register a new customer</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn" type="button" onclick="showPage('customers')">
+        <i class="ti ti-arrow-left"></i> Back
+      </button>
+    </div>
+  </div>
+
+  <div style="max-width: 620px;">
+    <div class="card">
+      <form method="POST" action="/dashboard/" id="add-customer-form">
+        {% csrf_token %}
+
+        <div class="section-label" style="margin-bottom:14px;">Personal information</div>
+
+        {{ form.full_name.label_tag }}
+        <div style="margin-bottom:18px;">
+          {{ form.full_name }}
+          {{ form.full_name.errors }}
+        </div>
+
+        <div class="grid-2" style="margin-bottom:18px;">
+          <div>
+            {{ form.national_id.label_tag }}
+            {{ form.national_id }}
+            {{ form.national_id.errors }}
+          </div>
+          <div>
+            {{ form.phone.label_tag }}
+            {{ form.phone }}
+            {{ form.phone.errors }}
+          </div>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          {{ form.city.label_tag }}
+          {{ form.city }}
+          {{ form.city.errors }}
+        </div>
+
+        <hr class="divider">
+
+        <div class="section-label" style="margin-bottom:14px; margin-top:2px;">Financial details</div>
+
+        <div class="grid-2" style="margin-bottom:18px;">
+          <div>
+            {{ form.credit_score.label_tag }}
+            {{ form.credit_score }}
+            {{ form.credit_score.errors }}
+          </div>
+          <div>
+            {{ form.monthly_salary.label_tag }}
+            {{ form.monthly_salary }}
+            {{ form.monthly_salary.errors }}
+          </div>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          {{ form.status.label_tag }}
+          {{ form.status }}
+          {{ form.status.errors }}
+        </div>
+
+        <hr class="divider">
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:4px;">
+          <button type="button" class="btn" onclick="showPage('customers')">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="ti ti-user-plus"></i> Add Customer
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══════════════════════ PAGE: CUSTOMER DETAIL ══════════════════════ -->
@@ -531,15 +687,19 @@
       <div class="page-title">Loans</div>
       <div class="page-sub">All loans in my customer portfolio</div>
     </div>
-    <div class="header-actions">
+    {% comment %} <div class="header-actions">
       <button class="btn"><i class="ti ti-filter"></i> Filter</button>
-    </div>
+    </div> {% endcomment %}
   </div>
 
-  <div class="alert-strip alert-danger">
-    <i class="ti ti-alert-circle"></i>
-    <strong>3 loans are delayed.</strong> Contact customers immediately. Escalate if DPD exceeds 30 days.
-  </div>
+  
+    {% if delayed_loans_count > 0  %}
+    <div class="alert-strip alert-danger">
+      <i class="ti ti-alert-circle"></i>
+        <strong>{{ delayed_loans_count }} loans are delayed.</strong> Contact customers immediately. Escalate if DPD exceeds 30 days.
+      </div>
+    {% endif %}
+    
 
   <div class="card" style="padding:0;margin-bottom:16px;">
     <div class="tbl-wrap">
@@ -563,7 +723,7 @@
     </div>
   </div>
 
-  <div class="section-label">Installment collection trend</div>
+  {% comment %} <div class="section-label">Installment collection trend</div>
   <div class="card">
     <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px;font-size:12px;color:var(--text-2);">
       <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--teal-mid);display:inline-block;"></span>Paid</span>
@@ -572,7 +732,7 @@
     <div class="chart-wrap" style="height:200px;">
       <canvas id="collectChart" role="img" aria-label="Bar chart of monthly collection: paid vs overdue amounts.">Monthly collection trend.</canvas>
     </div>
-  </div>
+  </div> {% endcomment %}
 </div>
 
 <!-- ══════════════════════ PAGE: KPI ══════════════════════ -->
@@ -647,7 +807,7 @@
     <div class="tbl-wrap">
       <table>
         <thead>
-          <tr><th>Loan no.</th><th>Customer</th><th>Disbursed (EGP)</th><th>Commission (EGP)</th><th>Date</th><th>Status</th></tr>
+          <tr><th>Loan no.</th><th>Customer</th><th>Commission (EGP)</th><th>Status</th></tr>
         </thead>
         <tbody id="commission-table"></tbody>
       </table>
@@ -664,6 +824,8 @@
 
 <!-- ══════════════════════ DATA & LOGIC ══════════════════════ -->
 <script>
+const all_loans = {{ all_loans|safe }};
+const all_commissions = {{ commissions|safe }};
 const customers = JSON.parse(document.getElementById('customers-data').textContent);
 const kpi_chart_data = JSON.parse(document.getElementById('kpi-chart-data').textContent);
 const customer_chart_data = JSON.parse(document.getElementById('customer-chart-data').textContent);
@@ -671,6 +833,8 @@ const customer_chart_data = JSON.parse(document.getElementById('customer-chart-d
 
 const pillMap = { active:'pill-active', pending:'pill-pending', delayed:'pill-delayed', rejected:'pill-closed' };
 const labelMap = { active:'Active', pending:'Pending', delayed:'Delayed', rejected:'Rejected' };
+const loanLabelMap = { Active:'Active', pending:'Pending', Delayed:'Delayed', Closed:'Rejected' };
+const loanPillMap = { Active:'pill-active', pending:'pill-pending', Delayed:'pill-delayed', Closed:'pill-closed' };
 
 function scoreRisk(s) {
   if(s>=750) return ['<span class="pill pill-active">Low risk</span>','#1D9E75'];
@@ -819,26 +983,25 @@ function renderDetail(id){
 
 /* ── Loan table ── */
 function renderLoanTable(){
-  const loans = customers.filter(c=>c.disbursed>0);
+  const loans = all_loans;
   const el = document.getElementById('loan-table');
   el.innerHTML = loans.map(c=>{
-    const dc = c.dpd===0?'var(--teal-mid)':c.dpd<10?'var(--amber-mid)':'var(--red-mid)';
+    const dc = c.dpd_count===0?'var(--teal-mid)':c.dpd_count<10?'var(--amber-mid)':'var(--red-mid)';
     return `<tr>
-      <td class="mono" style="font-size:12px;">${c.loan}</td>
+      <td class="mono" style="font-size:12px;">${c.loan_id}</td>
       <td>
         <div style="display:flex;align-items:center;gap:8px;">
-          <div class="av av-blue" style="font-size:10px;width:26px;height:26px;">${c.initials}</div>
-          <span style="font-size:13px;font-weight:500;">${c.name}</span>
+          <span style="font-size:13px;font-weight:500;">${c.customer_name}</span>
         </div>
       </td>
-      <td class="mono">${fmt(c.disbursed)}</td>
-      <td>${c.rate}%</td>
+      <td class="mono">${fmt(c.disbursed_amount)}</td>
+      <td>${c.interest_rate}%</td>
       <td>${c.tenure}mo</td>
-      <td class="mono">${fmt(c.installment)}</td>
-      <td class="mono">${fmt(c.outstanding)}</td>
-      <td style="font-weight:500;color:${dc};">${c.dpd===0?'—':c.dpd+'d'}</td>
-      <td><span class="pill ${pillMap[c.status]}">${labelMap[c.status]}</span></td>
-      <td><button class="btn" style="padding:4px 10px;font-size:12px;" onclick="showPage('customer-detail',${c.id})">View</button></td>
+      <td class="mono">${fmt(c.installment_amount)}</td>
+      <td class="mono">${fmt(c.outstanding_balance)}</td>
+      <td style="font-weight:500;color:${dc};">${c.dpd_count===0?'—':c.dpd_count+'d'}</td>
+      <td><span class="pill ${loanPillMap[c.loan_status]}">${loanLabelMap[c.loan_status]}</span></td>
+      {% comment %} <td><button class="btn" style="padding:4px 10px;font-size:12px;" onclick="showPage('customer-detail',${c.loan_id})">View</button></td> {% endcomment %}
     </tr>`;
   }).join('');
 }
@@ -846,23 +1009,21 @@ function renderLoanTable(){
 /* ── Commission table ── */
 function renderCommissionTable(){
   const el = document.getElementById('commission-table');
-  const data = customers.filter(c=>c.disbursed>0).map(c=>({
-    loan:c.loan, name:c.name, initials:c.initials,
-    disbursed:c.disbursed,
-    commission: Math.round(c.disbursed*0.02),
-    date:'2026-05-14', status:'Paid'
+  const data = all_commissions.filter(c=>c.amount>0).map(c=>({
+    loan:c.loan_id, name:c.customer_name,
+    amount:c.amount,
+    commission: Math.round(c.amount),
+    status:'Paid'
   }));
   el.innerHTML = data.map(d=>`<tr>
     <td class="mono" style="font-size:12px;">${d.loan}</td>
     <td>
       <div style="display:flex;align-items:center;gap:8px;">
-        <div class="av av-teal" style="font-size:10px;width:26px;height:26px;">${d.initials}</div>
+        {% comment %} <div class="av av-teal" style="font-size:10px;width:26px;height:26px;">${d.initials}</div> {% endcomment %}
         <span>${d.name}</span>
       </div>
     </td>
-    <td class="mono">${fmt(d.disbursed)}</td>
     <td class="mono c-teal" style="font-weight:500;">${fmt(d.commission)}</td>
-    <td style="font-size:12px;color:var(--text-3);">${d.date}</td>
     <td><span class="pill pill-active">Paid</span></td>
   </tr>`).join('');
 }
@@ -910,6 +1071,11 @@ function initCharts(){
 }
 
 /* ── Init ── */
+{% if show_add_customer %}
+    showPage('addCustomerSection');
+  {% else %}
+    showPage('dashboard');  {# or whatever your default is #}
+  {% endif %}
 renderDashInstallments();
 renderCustomerTable();
 renderLoanTable();
