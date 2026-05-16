@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | Sales Finance System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  /* ── Reset & Theme Injection ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --surface2: #f0f0ec;
+    --border: rgba(0,0,0,0.08);
+    --border-med: rgba(0,0,0,0.13);
+    --text: #1a1a18;
+    --text-2: #5a5a56;
+    --text-3: #9a9a94;
+    --teal: #0F6E56;
+    --teal-light: #E1F5EE;
+    --teal-mid: #1D9E75;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  
+  html, body { 
+    height: 100%; 
+    font-family: 'DM Sans', sans-serif; 
+    font-size: 14px; 
+    color: var(--text); 
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Layout container ── */
+  .login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+  }
+
+  /* ── Form Card ── */
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  }
+
+  /* ── Identity Header ── */
+  .login-brand {
+    display: flex; 
+    align-items: center; 
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .brand-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--teal); display: flex; align-items: center;
+    justify-content: center; color: white; font-size: 18px;
+  }
+  .brand-name { font-size: 15px; font-weight: 500; color: var(--text); }
+  .brand-sub  { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+
+  .login-intro {
+    margin-bottom: 24px;
+  }
+  .login-title { font-size: 20px; font-weight: 500; color: var(--text); }
+  .login-sub { font-size: 13px; color: var(--text-3); margin-top: 4px; }
+
+  /* ── Form Element Styles ── */
+  .form-group {
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .form-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-2);
+    margin-bottom: 6px;
+  }
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrapper i {
+    position: absolute;
+    left: 12px;
+    font-size: 18px;
+    color: var(--text-3);
+    pointer-events: none;
+  }
+  .form-control {
+    width: 100%;
+    padding: 10px 12px 10px 38px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-med);
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+    outline: none;
+  }
+  .form-control:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px var(--teal-light);
+  }
+
+  /* ── Context Utilities ── */
+  .form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    font-size: 13px;
+  }
+  .remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  .remember-me input {
+    accent-color: var(--teal);
+    cursor: pointer;
+  }
+  .forgot-link {
+    color: var(--teal);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.12s;
+  }
+  .forgot-link:hover {
+    color: var(--teal-mid);
+  }
+
+  /* ── Actions ── */
+  .btn-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    background: var(--teal);
+    color: white;
+    border: 1px solid var(--teal);
+    transition: all 0.12s;
+  }
+  .btn-submit:hover {
+    background: var(--teal-mid);
+    border-color: var(--teal-mid);
+  }
+
+  .login-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+</style>
+</head>
+<body>
+
+<div class="login-container">
+  <div class="login-card">
+    
+    <!-- Branding Hierarchy -->
+    <div class="login-brand">
+      <div class="brand-icon">
+        <i class="ti ti-building-bank"></i>
+      </div>
+      <div>
+        <div class="brand-name">Sales Finance System</div>
+        <div class="brand-sub"></div>
+      </div>
+    </div>
+
+    <!-- Intro text -->
+    <div class="login-intro">
+      <h1 class="login-title">Welcome back</h1>
+      <p class="login-sub">Please sign in to access your dashboard</p>
+    </div>
+
+    <!-- Login Form -->
+    <form autocomplete="off">
+      <div class="form-group">
+        <label class="form-label" for="username">Employee ID</label>
+        <div class="input-wrapper">
+          <i class="ti ti-user"></i>
+          <input type="text" id="username" class="form-control" placeholder="EMP----" required inputmode="email">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-wrapper">
+          <i class="ti ti-lock"></i>
+          <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+        </div>
+      </div>
+
+      <div class="form-options">
+        <label class="remember-me">
+          <input type="checkbox" id="remember">
+          <span>Remember me</span>
+        </label>
+        <a href="#" class="forgot-link">Forgot?</a>
+      </div>
+
+      <button type="submit" class="btn-submit">
+        <span>Sign In</span>
+        <i class="ti ti-arrow-right"></i>
+      </button>
+    </form>
+
+  </div>
+  
+</div>
+
+</body>
+</html>

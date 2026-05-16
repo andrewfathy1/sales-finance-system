@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Finance System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --surface2: #f0f0ec;
+    --border: rgba(0,0,0,0.08);
+    --border-med: rgba(0,0,0,0.13);
+    --text: #1a1a18;
+    --text-2: #5a5a56;
+    --text-3: #9a9a94;
+    --teal: #0F6E56;
+    --teal-light: #E1F5EE;
+    --teal-mid: #1D9E75;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --amber: #854F0B;
+    --amber-light: #FAEEDA;
+    --amber-mid: #BA7517;
+    --red: #A32D2D;
+    --red-light: #FCEBEB;
+    --red-mid: #E24B4A;
+    --sidebar-w: 220px;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  html, body { height: 100%; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: var(--bg); }
+
+  /* ── Layout shell ── */
+  .shell { display: flex; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w); flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh;
+    overflow-y: auto;
+    
+    
+  }
+  .sidebar-brand {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand-logo {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .brand-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--teal); display: flex; align-items: center;
+    justify-content: center; color: white; font-size: 16px;
+  }
+  .brand-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .brand-sub  { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+
+  .sidebar-officer {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .officer-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--teal-light); color: var(--teal);
+    font-size: 12px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .officer-name  { font-size: 12px; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .officer-role  { font-size: 11px; color: var(--text-3); }
+
+  .nav { padding: 10px 10px; flex: 1; }
+  .nav-section { font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3); padding: 10px 8px 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; border-radius: var(--radius-sm);
+    color: var(--text-2); font-size: 13px; cursor: pointer;
+    transition: background 0.12s; text-decoration: none;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--teal-light); color: var(--teal); font-weight: 500; }
+  .nav-item i { font-size: 16px; width: 18px; }
+  .nav-badge {
+    margin-left: auto; font-size: 10px; font-weight: 500;
+    padding: 1px 6px; border-radius: 99px;
+    background: var(--red-light); color: var(--red);
+  }
+
+  /* ── Main content ── */
+  .main { flex: 1; overflow-x: hidden; }
+  .page { display: none; padding: 28px 32px; max-width: 1400px; }
+  .page.active { display: block; }
+
+  /* ── Page header ── */
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+  .page-title  { font-size: 20px; font-weight: 500; color: var(--text); }
+  .page-sub    { font-size: 13px; color: var(--text-3); margin-top: 3px; }
+  .header-actions { display: flex; gap: 8px; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    border: 1px solid var(--border-med); background: var(--surface);
+    color: var(--text-2); transition: all 0.12s; font-family: inherit;
+  }
+  .btn:hover { background: var(--surface2); color: var(--text); }
+  .btn-primary { background: var(--teal); color: white; border-color: var(--teal); }
+  .btn-primary:hover { background: var(--teal-mid); border-color: var(--teal-mid); color: white; }
+
+  /* ── Section label ── */
+  .section-label {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-3); margin-bottom: 10px;
+  }
+
+  /* ── Metric cards ── */
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 24px; }
+  .metric {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+  }
+  .metric-label { font-size: 12px; color: var(--text-3); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+  .metric-value { font-size: 26px; font-weight: 500; line-height: 1; }
+  .metric-sub   { font-size: 11px; color: var(--text-3); margin-top: 5px; }
+  .c-teal  { color: var(--teal-mid); }
+  .c-amber { color: var(--amber-mid); }
+  .c-red   { color: var(--red-mid); }
+  .c-blue  { color: var(--blue); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 14px; }
+
+  /* ── Grid layouts ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-3-1 { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);  gap: 16px; margin-bottom: 16px; }
+
+  /* ── KPI bars ── */
+  .kpi-item { margin-bottom: 14px; }
+  .kpi-item:last-child { margin-bottom: 0; }
+  .kpi-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); margin-bottom: 5px; }
+  .kpi-pct { font-weight: 500; }
+  .kpi-track { height: 6px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .kpi-fill  { height: 100%; border-radius: 99px; }
+  .kpi-hint  { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+
+  /* ── Status pills ── */
+  .pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+  .pill-active  { background: var(--teal-light);  color: var(--teal); }
+  .pill-pending { background: var(--amber-light); color: var(--amber); }
+  .pill-delayed { background: var(--red-light);   color: var(--red); }
+  .pill-closed  { background: var(--surface2);    color: var(--text-3); }
+  .pill-approved{ background: var(--teal-light);  color: var(--teal); }
+  .pill-rejected{ background: var(--red-light);   color: var(--red); }
+
+  /* ── Table ── */
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { font-size: 11px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 12px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+
+  /* ── Avatar ── */
+  .av {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500; flex-shrink: 0;
+  }
+  .av-teal  { background: var(--teal-light);  color: var(--teal); }
+  .av-blue  { background: var(--blue-light);  color: var(--blue); }
+  .av-amber { background: var(--amber-light); color: var(--amber); }
+  .av-red   { background: var(--red-light);   color: var(--red); }
+
+  /* ── Reporting chain ── */
+  .chain-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); position: relative; }
+  .chain-item:last-child { border-bottom: none; }
+  .chain-line { position: absolute; left: 14px; top: 38px; width: 1px; height: calc(100% - 6px); background: var(--border); }
+  .chain-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .chain-role { font-size: 11px; color: var(--text-3); }
+
+  /* ── Installment bar ── */
+  .inst-bar-bg { height: 5px; background: var(--surface2); border-radius: 99px; flex: 1; }
+  .inst-bar-fill { height: 100%; border-radius: 99px; }
+
+  /* ── Detail field ── */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .detail-field { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .detail-field:nth-last-child(-n+2) { border-bottom: none; }
+  .field-label { font-size: 11px; color: var(--text-3); margin-bottom: 3px; }
+  .field-value { font-size: 13px; color: var(--text); font-weight: 500; }
+
+  /* ── DPD dot ── */
+  .dpd-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Divider ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+  /* ── Credit score bar ── */
+  .score-bar-wrap { margin-top: 6px; }
+  .score-track { height: 8px; background: linear-gradient(to right, var(--red-mid), var(--amber-mid), var(--teal-mid)); border-radius: 99px; position: relative; }
+  .score-thumb { position: absolute; top: -3px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 2px solid var(--text); transform: translateX(-50%); }
+
+  /* ── Breadcrumb ── */
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3); margin-bottom: 18px; }
+  .breadcrumb span { color: var(--text-2); cursor: pointer; }
+  .breadcrumb span:hover { color: var(--teal); }
+  .breadcrumb i { font-size: 12px; }
+
+  /* ── Alert strip ── */
+  .alert-strip { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 13px; }
+  .alert-warn  { background: var(--amber-light); color: var(--amber); border-left: 3px solid var(--amber-mid); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+  .alert-danger{ background: var(--red-light);   color: var(--red);   border-left: 3px solid var(--red-mid);   border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+
+  /* ── Chart wrapper ── */
+  .chart-wrap { position: relative; width: 100%; }
+
+  /* ── Mono numbers ── */
+  .mono { font-family: 'DM Mono', monospace; }
+  
+  {% comment %} body {
+        transform: scale(1.5);
+        transform-origin: 0 0;
+        width: 66.66%; /* Compensates for the scale so content doesn't overflow */
+    } {% endcomment %}
+
+    body {
+  zoom: 1.5; /* try 1.2 → 1.4 depending on what feels right */
+}
+    
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ══════════════════════ SIDEBAR ══════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <div class="brand-icon"><i class="ti ti-building-bank"></i></div>
+      <div>
+        <div class="brand-name">SalesFinance</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-officer">
+    <div class="officer-avatar">{{ employee.name_initials }}</div>
+    <div>
+      <div class="officer-name">{{ employee.full_name }}</div>
+      <div class="officer-role"> {{ employee.hierarchy_level_id}} · {{ employee.territory_id}}</div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section">Main</div>
+    <button class="nav-item active" onclick="showPage('dashboard')">
+      <i class="ti ti-layout-dashboard"></i> Dashboard
+    </button>
+    <button class="nav-item" onclick="showPage('customers')">
+      <i class="ti ti-users"></i> My Customers
+    </button>
+    <button class="nav-item" onclick="showPage('loans')">
+      <i class="ti ti-file-invoice"></i> Loans
+      <span class="nav-badge">3</span>
+    </button>
+
+    <div class="nav-section">Performance</div>
+    <button class="nav-item" onclick="showPage('kpi')">
+      <i class="ti ti-chart-bar"></i> KPIs
+    </button>
+    <button class="nav-item" onclick="showPage('commissions')">
+      <i class="ti ti-coin"></i> Commissions
+    </button>
+
+    <div class="nav-section">Account</div>
+    <button class="nav-item">
+      <i class="ti ti-settings"></i> Settings
+    </button>
+    <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+      {% csrf_token %}
+    </form>
+
+    <button class="nav-item" onclick="document.getElementById('logout-form').submit();">
+      <i class="ti ti-logout"></i> Sign out
+    </button>
+
+  </nav>
+</aside>
+
+<!-- ══════════════════════ PAGE: DASHBOARD ══════════════════════ -->
+<main class="main">
+<div id="page-dashboard" class="page active">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Hello, {{ employee.full_name.split.0 }}</div>
+      <div class="page-sub"> </div>
+      <div class="page-sub">{{ date }} &nbsp;·&nbsp; {{ employee.territory_id }} territory</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="showPage('customers')"><i class="ti ti-plus"></i> New customer</button>
+    </div>
+  </div>
+
+  {% comment %} <div class="alert-strip alert-warn">
+    <i class="ti ti-alert-triangle"></i>
+    <strong>3 delayed loans</strong> in your portfolio require follow-up. DPD ranges from 5 to 15 days.
+  </div> {% endcomment %}
+
+  <div class="section-label">My portfolio</div>
+  <div class="metric-grid">
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-users"></i> Total customers</div>
+      <div class="metric-value">{{ customer_count }}</div>
+      {% comment %} <div class="metric-sub">Alexandria territory</div> {% endcomment %}
+    </div>
+    {% comment %} <div class="metric">
+      <div class="metric-label"><i class="ti ti-circle-check"></i> Active loans</div>
+      <div class="metric-value c-teal">40</div>
+      <div class="metric-sub">74.1% active rate</div>
+    </div> {% endcomment %}
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-clock"></i>Total Pending Customers</div>
+      <div class="metric-value c-amber">{{ pending_customer_count }}</div>
+      <div class="metric-sub">awaiting approval</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-alert-circle"></i> Delayed Loans</div>
+      <div class="metric-value c-red">{{ delayed_loans_count}}</div>
+      <div class="metric-sub">needs follow-up</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-coin"></i> Achieved</div>
+      <div class="metric-value c-teal mono" style="font-size:20px;">{{ kpi_record.achieved_amount_formatted }}</div>
+      <div class="metric-sub">EGP this month</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-trending-up"></i> Collection rate</div>
+      <div class="metric-value c-teal">{{kpi_record.collection_rate}}<span style="font-size:16px;">%</span></div>
+      <div class="metric-sub">of due installments</div>
+    </div>
+  </div>
+
+  <div class="grid-3-1">
+    <div>
+      <div class="section-label">Monthly KPIs</div>
+      <div class="card">
+        <div class="kpi-item">
+          <div class="kpi-top"><span><i class="ti ti-target"></i> Target achievement</span><span class="kpi-pct c-teal">{{ kpi_record.achievement_rate}}%</span></div>
+          <div class="kpi-track"><div class="kpi-fill" style="width:{{kpi_record.achievement_rate}}%;background:var(--teal-mid);"></div></div>
+          <div class="kpi-hint">EGP {{kpi_record.achieved_amount_formatted}} of {{kpi_record.target_amount_formatted}} target</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-top"><span><i class="ti ti-refresh"></i> Collection rate</span><span class="kpi-pct c-teal">{{kpi_record.collection_rate}}%</span></div>
+          <div class="kpi-track"><div class="kpi-fill" style="width:{{kpi_record.collection_rate}}%;background:var(--teal-mid);"></div></div>
+          <div class="kpi-hint">collecting {{kpi_record.collection_rate}}% of due installments</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-top"><span><i class="ti ti-check"></i> Approval rate</span><span class="kpi-pct c-amber">100%</span></div>
+          <div class="kpi-track"><div class="kpi-fill" style="width:100%;background:var(--amber-mid);"></div></div>
+          <div class="kpi-hint">100 of 100 applications approved</div>
+        </div> 
+      </div>
+
+      <div class="section-label">Upcoming installments</div>
+      <div class="card">
+        <div id="dash-installments"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Customer split</div>
+      <div class="card">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+          <span class="pill pill-active">{{active_customers_count}} Active</span>
+          <span class="pill pill-pending">{{employee_pending_customers_count}} Pending</span>
+          <span class="pill pill-delayed">{{employee_rejected_customers_count}} Rejected</span>
+        </div>
+        <div class="chart-wrap" style="height:160px;">
+          <canvas id="splitChart" role="img" aria-label="">{{active_customers_count}} active, {{employee_pending_customers_count}} pending, {{employee_rejected_customers_count}} rejected.</canvas>
+        </div>
+      </div>
+
+      <div class="section-label">Reporting chain</div>
+      <div class="card">
+         {% for member in reporting_chain %}
+          <div class="chain-item">
+            <div class="chain-line"></div>
+            <div class="av av-teal" style="font-size:10px;">{{ member.name_initials }}</div>
+            <div><div class="chain-name">{{ member.full_name }}</div><div class="chain-role">{{ member.hierarchy_level_id }}</div></div>
+          </div>
+        {% endfor %}
+        <div class="chain-item" style="background:var(--teal-light);margin:-2px -4px;padding:8px 4px;border-radius:var(--radius-sm);">
+          <div class="av av-teal" style="font-size:10px;">{{ employee.name_initials }}</div>
+          <div><div class="chain-name" style="color:var(--teal);">You</div><div class="chain-role">{{ employee.hierarchy_level_id }}</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE: CUSTOMERS ══════════════════════ -->
+<div id="page-customers" class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">My customers</div>
+      <div class="page-sub">{{ customer_count }} customers</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn"><i class="ti ti-filter"></i> Filter</button>
+      <button class="btn btn-primary"><i class="ti ti-plus"></i> New customer</button>
+    </div>
+  </div>
+
+   <div class="metric-grid" style="grid-template-columns:repeat(4,1fr);">
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-users"></i> Total</div>
+      <div class="metric-value">{{ customer_count }}</div>
+    </div> 
+     <div class="metric">
+      <div class="metric-label"><i class="ti ti-circle-check"></i> Active</div>
+      <div class="metric-value c-teal">{{ active_customers_count}}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-clock"></i> Pending</div>
+      <div class="metric-value c-amber">{{employee_pending_customers_count}}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-alert-circle"></i> Rejected</div>
+      <div class="metric-value c-red">{{employee_rejected_customers_count}}</div>
+    </div>
+  </div> 
+
+  <div class="card" style="padding:0;">
+    {% comment %} <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+      <i class="ti ti-search" style="color:var(--text-3);"></i>
+      <input type="text" placeholder="Search by name, phone, or national ID..." style="border:none;outline:none;font-size:13px;color:var(--text);background:transparent;flex:1;font-family:inherit;">
+    </div> {% endcomment %}
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Credit score</th>
+            <th>Salary (EGP)</th>
+            {% comment %} <th>Loan</th> {% endcomment %}
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="customer-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE: CUSTOMER DETAIL ══════════════════════ -->
+<div id="page-customer-detail" class="page">
+  <div class="breadcrumb">
+    <span onclick="showPage('customers')"><i class="ti ti-arrow-left"></i> Customers</span>
+    <i class="ti ti-chevron-right"></i>
+    <span id="detail-breadcrumb">Customer detail</span>
+  </div>
+
+  <div id="detail-alert"></div>
+
+  <div class="grid-3-1">
+    <div>
+      <div class="section-label">Customer profile</div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+          <div class="av av-blue" style="width:48px;height:48px;font-size:15px;" id="detail-av"></div>
+          <div>
+            <div style="font-size:16px;font-weight:500;" id="detail-name"></div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:2px;" id="detail-city"></div>
+          </div>
+          <div style="margin-left:auto;" id="detail-status"></div>
+        </div>
+        <div class="detail-grid" id="detail-fields"></div>
+      </div>
+
+      {% comment %} <div class="section-label">Finance application</div>
+      <div class="card" id="detail-finance"></div> {% endcomment %}
+    </div>
+
+    <div>
+      <div class="section-label">Credit assessment</div>
+      <div class="card">
+        <div class="field-label">Credit score</div>
+        <div style="font-size:22px;font-weight:500;margin:4px 0;" id="detail-score-val"></div>
+        <div class="score-bar-wrap">
+          <div class="score-track"><div class="score-thumb" id="detail-score-thumb"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-3);margin-top:4px;"><span>300</span><span>850</span></div>
+        </div>
+        <div style="margin-top:10px;" id="detail-score-label"></div>
+      </div>
+
+      {% comment %} <div class="section-label">Loan summary</div>
+      <div class="card" id="detail-loan"></div>
+
+      <div class="section-label">Installment progress</div>
+      <div class="card" id="detail-installments"></div> {% endcomment %}
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE: LOANS ══════════════════════ -->
+<div id="page-loans" class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Loans</div>
+      <div class="page-sub">All loans in my customer portfolio</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn"><i class="ti ti-filter"></i> Filter</button>
+    </div>
+  </div>
+
+  <div class="alert-strip alert-danger">
+    <i class="ti ti-alert-circle"></i>
+    <strong>3 loans are delayed.</strong> Contact customers immediately. Escalate if DPD exceeds 30 days.
+  </div>
+
+  <div class="card" style="padding:0;margin-bottom:16px;">
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Loan no.</th>
+            <th>Customer</th>
+            <th>Disbursed (EGP)</th>
+            <th>Rate</th>
+            <th>Tenure</th>
+            <th>Installment (EGP)</th>
+            <th>Outstanding (EGP)</th>
+            <th>DPD</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="loan-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section-label">Installment collection trend</div>
+  <div class="card">
+    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px;font-size:12px;color:var(--text-2);">
+      <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--teal-mid);display:inline-block;"></span>Paid</span>
+      <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--red-mid);display:inline-block;"></span>Overdue</span>
+    </div>
+    <div class="chart-wrap" style="height:200px;">
+      <canvas id="collectChart" role="img" aria-label="Bar chart of monthly collection: paid vs overdue amounts.">Monthly collection trend.</canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE: KPI ══════════════════════ -->
+<div id="page-kpi" class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">My KPIs</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Target vs achievement</div>
+      <div class="chart-wrap" style="height:220px;">
+        <canvas id="kpiChart" role="img" aria-label="Bar chart comparing target vs achieved amounts.">Target {{kpi_record.target_amount_formatted}} vs achieved {{kpi_record.achieved_amount_formatted}}.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Performance breakdown</div>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px;">
+        <div class="kpi-item">
+          <div class="kpi-top"><span>Target amount</span><span class="kpi-pct c-teal">{{kpi_record.achievement_rate}}%</span></div>
+          <div class="kpi-track"><div class="kpi-fill" style="width:{{kpi_record.achievement_rate}}%;background:var(--teal-mid);"></div></div>
+          <div class="kpi-hint">EGP {{kpi_record.achieved_amount_formatted}} / {{kpi_record.target_amount_formatted}}</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-top"><span>Collection rate</span><span class="kpi-pct c-teal">{{kpi_record.collection_rate}}%</span></div>
+          <div class="kpi-track"><div class="kpi-fill" style="width:{{kpi_record.collection_rate}}%;background:var(--teal-mid);"></div></div>
+          <div class="kpi-hint">Collected / due installments this month</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-top"><span>Approval rate</span><span class="kpi-pct c-amber">100%</span></div>
+          <div class="kpi-track"><div class="kpi-fill" style="width:100%;background:var(--amber-mid);"></div></div>
+          <div class="kpi-hint">100 approved / 100 total applications</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-top"><span>Active customer rate</span><span class="kpi-pct c-teal">{{employee_active_customers_rate}}%</span></div>
+          <div class="kpi-track"><div class="kpi-fill" style="width:{{employee_active_customers_rate}}%;background:var(--teal-mid);"></div></div>
+          <div class="kpi-hint">{{active_customers_count}} active of {{customer_count}} total customers</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE: COMMISSIONS ══════════════════════ -->
+<div id="page-commissions" class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">My commissions</div>
+      
+    </div>
+  </div>
+  <div class="metric-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-coin"></i> This month</div>
+      <div class="metric-value c-teal mono">0</div>
+      <div class="metric-sub">EGP · May 2026</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-calendar"></i> Total earned</div>
+      <div class="metric-value mono" style="font-size:20px;">{{total_earned}}</div>
+      <div class="metric-sub">EGP · all time</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-file-invoice"></i> Commission records</div>
+      <div class="metric-value">{{total_commissions}}</div>
+      <div class="metric-sub">across all loans</div>
+    </div>
+  </div>
+  <div class="card" style="padding:0;">
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Loan no.</th><th>Customer</th><th>Disbursed (EGP)</th><th>Commission (EGP)</th><th>Date</th><th>Status</th></tr>
+        </thead>
+        <tbody id="commission-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+{{ upcoming_installments|json_script:"installments-data" }}
+{{ customers|json_script:"customers-data" }}
+{{ employee_kpi_chart_data|json_script:"kpi-chart-data" }}
+{{ employee_customer_chart_data|json_script:"customer-chart-data" }}
+
+<!-- ══════════════════════ DATA & LOGIC ══════════════════════ -->
+<script>
+const customers = JSON.parse(document.getElementById('customers-data').textContent);
+const kpi_chart_data = JSON.parse(document.getElementById('kpi-chart-data').textContent);
+const customer_chart_data = JSON.parse(document.getElementById('customer-chart-data').textContent);
+
+
+const pillMap = { active:'pill-active', pending:'pill-pending', delayed:'pill-delayed', rejected:'pill-closed' };
+const labelMap = { active:'Active', pending:'Pending', delayed:'Delayed', rejected:'Rejected' };
+
+function scoreRisk(s) {
+  if(s>=750) return ['<span class="pill pill-active">Low risk</span>','#1D9E75'];
+  if(s>=650) return ['<span class="pill pill-pending">Medium risk</span>','#BA7517'];
+  return ['<span class="pill pill-delayed">High risk</span>','#E24B4A'];
+}
+
+function fmt(n){ return n.toLocaleString(); }
+function initials(n){ return n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
+
+/* ── Nav ── */
+function showPage(id, extra) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const navMap = {dashboard:'dashboard',customers:'customers',loans:'loans',kpi:'kpi',commissions:'commissions'};
+  document.querySelectorAll('.nav-item').forEach(b=>{
+    if(b.textContent.trim().toLowerCase().includes(navMap[id]||id)) b.classList.add('active');
+  });
+  if(id==='customer-detail' && extra!=null) renderDetail(extra);
+}
+
+/* ── Dashboard installments ── */
+function renderDashInstallments(){
+  const installs = JSON.parse(document.getElementById('installments-data').textContent);
+  
+  {% comment %} [
+    {date:'May 15',name:'Michael Scott',amt:2890,dpd:0},
+    {date:'May 15',name:'Cody Johnson',amt:1900,dpd:0},
+    {date:'May 16',name:'Omar Khaled',amt:2540,dpd:0},
+    {date:'May 10',name:'Stephanie Price',amt:3210,dpd:5},
+    {date:'May 08',name:'Tarek Samy',amt:2280,dpd:7},
+    {date:'Apr 30',name:'Hassan Eid',amt:2250,dpd:15},
+  ]; {% endcomment %}
+
+
+  const el = document.getElementById('dash-installments');
+  el.innerHTML = installs.map(i=>{
+    const c = i.dpd===0?'var(--teal-mid)':i.dpd<10?'var(--amber-mid)':'var(--red-mid)';
+    const pill = i.dpd===0?'pill-active':'pill-delayed';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+      <div style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0;"></div>
+      <div style="font-size:12px;color:${i.dpd>0?'var(--red-mid)':'var(--text-3)'};min-width:60px;">${i.due_date}${i.dpd>0?` <small>(+${i.dpd}d)</small>`:''}</div>
+      <div style="flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${i.amount}</div>
+      <div style="font-size:13px;font-weight:500;font-family:'DM Mono',monospace;min-width:60px;text-align:right;">EGP ${fmt(i.amount)}</div>
+      <span class="pill ${pill}" style="font-size:10px;">${i.status}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ── Customer table ── */
+function renderCustomerTable(){
+  const el = document.getElementById('customer-table');
+  el.innerHTML = customers.map(c=>`<tr>
+    <td>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="av av-blue" style="font-size:10px;">${c.initials}</div>
+        <div>
+          <div style="font-weight:500;">${c.name}</div>
+          <div style="font-size:11px;color:var(--text-3);">${c.national_id}</div>
+        </div>
+      </div>
+    </td>
+    <td class="mono" style="font-size:12px;">${c.phone}</td>
+    <td>
+      <span style="font-weight:500;color:${c.credit_score>=750?'var(--teal-mid)':c.credit_score>=650?'var(--amber-mid)':'var(--red-mid)'};">${c.credit_score}</span>
+    </td>
+    <td class="mono">${fmt(c.salary)}</td>
+    
+    <td><span class="pill ${pillMap[c.status]}">${labelMap[c.status]}</span></td>
+    <td><button class="btn" style="padding:4px 10px;font-size:12px;" onclick="showPage('customer-detail',${c.id})">View</button></td>
+  </tr>`).join('');
+}
+
+/* ── Customer detail ── */
+function renderDetail(id){
+  const c = customers.find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById('detail-breadcrumb').textContent = c.name;
+  document.getElementById('detail-av').textContent = c.initials;
+  document.getElementById('detail-name').textContent = c.name;
+  document.getElementById('detail-city').textContent = c.city + ' · ' + c.phone;
+  document.getElementById('detail-status').innerHTML = `<span class="pill ${pillMap[c.status]}">${labelMap[c.status]}</span>`;
+
+  const [riskPill, riskColor] = scoreRisk(c.credit_score);
+  document.getElementById('detail-score-val').textContent = c.credit_score;
+  document.getElementById('detail-score-val').style.color = riskColor;
+  const pct = ((c.credit_score-300)/(850-300)*100).toFixed(1);
+  document.getElementById('detail-score-thumb').style.left = pct+'%';
+  document.getElementById('detail-score-label').innerHTML = riskPill + `<div style="font-size:11px;color:var(--text-3);margin-top:5px;">${c.credit_score>=750?'Qualifies for best rates':c.credit_score>=650?'Standard rates apply':'High risk — may require review'}</div>`;
+
+  document.getElementById('detail-fields').innerHTML = [
+    ['National ID', c.national_id],['Phone', c.phone],
+    ['City', c.city],['Monthly salary', 'EGP '+fmt(c.salary)],
+    {% comment %} ['Assigned officer', 'Mohamed A. Abd El Maksoud'],['Registration', '2024-10-21'], {% endcomment %}
+  ].map(([l,v])=>`<div class="detail-field"><div class="field-label">${l}</div><div class="field-value mono">${v}</div></div>`).join('');
+
+  const finEl = document.getElementById('detail-finance');
+  if(c.status==='pending'){
+    finEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;color:var(--amber);"><i class="ti ti-clock" style="font-size:20px;"></i><div><div style="font-weight:500;">Finance application pending</div><div style="font-size:12px;color:var(--text-3);margin-top:2px;">Requested: EGP ${fmt(c.finAmt)} · Awaiting approval</div></div></div>`;
+  } else {
+    finEl.innerHTML = [
+      ['Requested amount','EGP '+fmt(c.finAmt)],
+      ['Approved amount','EGP '+fmt(c.finAmt)],
+      ['Status', c.status==='delayed'?'<span class="pill pill-delayed">Delayed</span>':'<span class="pill pill-approved">Approved</span>'],
+      ['Approval date','2026-05-09'],
+    ].map(([l,v])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="color:var(--text-3);">${l}</span><span style="font-weight:500;">${v}</span></div>`).join('');
+  }
+
+  const loanEl = document.getElementById('detail-loan');
+  if(c.disbursed===0){
+    loanEl.innerHTML = `<div style="font-size:13px;color:var(--text-3);text-align:center;padding:16px 0;"><i class="ti ti-file-off" style="font-size:20px;display:block;margin-bottom:6px;"></i>No loan disbursed yet</div>`;
+  } else {
+    loanEl.innerHTML = [
+      ['Loan no.', c.loan],
+      ['Disbursed','EGP '+fmt(c.disbursed)],
+      ['Interest rate', c.rate+'%'],
+      ['Tenure', c.tenure+' months'],
+      ['Monthly installment','EGP '+fmt(c.installment)],
+      ['Outstanding','EGP '+fmt(c.outstanding)],
+      ['DPD', c.dpd===0?'0 days (current)':`<span class="c-red">${c.dpd} days overdue</span>`],
+    ].map(([l,v])=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="color:var(--text-3);">${l}</span><span style="font-weight:500;">${v}</span></div>`).join('');
+  }
+
+  const paid = c.disbursed - c.outstanding;
+  const paidPct = c.disbursed>0 ? Math.round(paid/c.disbursed*100) : 0;
+  document.getElementById('detail-installments').innerHTML = c.disbursed===0
+    ? `<div style="font-size:13px;color:var(--text-3);text-align:center;padding:16px 0;">No installments yet</div>`
+    : `<div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-2);margin-bottom:5px;">
+          <span>Collected</span><span style="font-weight:500;">EGP ${fmt(paid)} (${paidPct}%)</span>
+        </div>
+        <div class="kpi-track"><div class="kpi-fill" style="width:${paidPct}%;background:var(--teal-mid);"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);margin-top:3px;"><span>Outstanding: EGP ${fmt(c.outstanding)}</span><span>Total: EGP ${fmt(c.disbursed)}</span></div>
+      </div>
+      ${c.dpd>0?`<div class="alert-strip alert-${c.dpd>=10?'danger':'warn'}" style="margin-top:10px;"><i class="ti ti-alert-triangle"></i>DPD is ${c.dpd} days. ${c.dpd>=10?'Consider escalating to supervisor.':'Call customer immediately.'}</div>`:''}`;
+
+  if(c.dpd>=10){
+    document.getElementById('detail-alert').innerHTML = `<div class="alert-strip alert-danger"><i class="ti ti-alert-circle"></i><strong>DPD ${c.dpd} days</strong> — Escalate to supervisor immediately per protocol.</div>`;
+  } else if(c.dpd>0){
+    document.getElementById('detail-alert').innerHTML = `<div class="alert-strip alert-warn"><i class="ti ti-alert-triangle"></i><strong>DPD ${c.dpd} days</strong> — Contact customer to arrange payment.</div>`;
+  } else {
+    document.getElementById('detail-alert').innerHTML = '';
+  }
+}
+
+/* ── Loan table ── */
+function renderLoanTable(){
+  const loans = customers.filter(c=>c.disbursed>0);
+  const el = document.getElementById('loan-table');
+  el.innerHTML = loans.map(c=>{
+    const dc = c.dpd===0?'var(--teal-mid)':c.dpd<10?'var(--amber-mid)':'var(--red-mid)';
+    return `<tr>
+      <td class="mono" style="font-size:12px;">${c.loan}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="av av-blue" style="font-size:10px;width:26px;height:26px;">${c.initials}</div>
+          <span style="font-size:13px;font-weight:500;">${c.name}</span>
+        </div>
+      </td>
+      <td class="mono">${fmt(c.disbursed)}</td>
+      <td>${c.rate}%</td>
+      <td>${c.tenure}mo</td>
+      <td class="mono">${fmt(c.installment)}</td>
+      <td class="mono">${fmt(c.outstanding)}</td>
+      <td style="font-weight:500;color:${dc};">${c.dpd===0?'—':c.dpd+'d'}</td>
+      <td><span class="pill ${pillMap[c.status]}">${labelMap[c.status]}</span></td>
+      <td><button class="btn" style="padding:4px 10px;font-size:12px;" onclick="showPage('customer-detail',${c.id})">View</button></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── Commission table ── */
+function renderCommissionTable(){
+  const el = document.getElementById('commission-table');
+  const data = customers.filter(c=>c.disbursed>0).map(c=>({
+    loan:c.loan, name:c.name, initials:c.initials,
+    disbursed:c.disbursed,
+    commission: Math.round(c.disbursed*0.02),
+    date:'2026-05-14', status:'Paid'
+  }));
+  el.innerHTML = data.map(d=>`<tr>
+    <td class="mono" style="font-size:12px;">${d.loan}</td>
+    <td>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="av av-teal" style="font-size:10px;width:26px;height:26px;">${d.initials}</div>
+        <span>${d.name}</span>
+      </div>
+    </td>
+    <td class="mono">${fmt(d.disbursed)}</td>
+    <td class="mono c-teal" style="font-weight:500;">${fmt(d.commission)}</td>
+    <td style="font-size:12px;color:var(--text-3);">${d.date}</td>
+    <td><span class="pill pill-active">Paid</span></td>
+  </tr>`).join('');
+}
+
+/* ── Charts ── */
+const gridC = 'rgba(0,0,0,0.05)';
+const tickC = '#9a9a94';
+
+function initCharts(){
+  new Chart(document.getElementById('splitChart'),{
+    type:'doughnut',
+    data:{labels:['Active','Pending','Rejected'],datasets:[{data:[customer_chart_data.active, customer_chart_data.pending, customer_chart_data.rejected],backgroundColor:['#1D9E75','#BA7517','#E24B4A'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false}}}
+  });
+
+  new Chart(document.getElementById('collectChart'),{
+    type:'bar',
+    data:{
+      labels:['Dec','Jan','Feb','Mar','Apr','May'],
+      datasets:[
+        {label:'Paid',data:[82000,91000,78000,95000,88000,72000],backgroundColor:'#1D9E75',borderRadius:3},
+        {label:'Overdue',data:[4000,6000,9000,3000,8000,12000],backgroundColor:'#E24B4A',borderRadius:3}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:tickC,font:{size:11}},grid:{color:gridC}},
+        y:{ticks:{color:tickC,font:{size:11},callback:v=>v>=1000?(v/1000)+'k':v},grid:{color:gridC}}
+      }
+    }
+  });
+  new Chart(document.getElementById('kpiChart'),{
+    type:'bar',
+    data:{
+      labels:['Target','Achieved'],
+      datasets:[{data:[kpi_chart_data.target,kpi_chart_data.achieved],backgroundColor:['#D3D1C7','#1D9E75'],borderRadius:5,borderSkipped:false}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:tickC,font:{size:12}},grid:{display:false}},
+        y:{ticks:{color:tickC,font:{size:11},callback:v=>'EGP '+(v/1000000).toFixed(1)+'M'},grid:{color:gridC}}
+      }
+    }
+  });
+}
+
+/* ── Init ── */
+renderDashInstallments();
+renderCustomerTable();
+renderLoanTable();
+renderCommissionTable();
+initCharts();
+</script>
+</body>
+</html>

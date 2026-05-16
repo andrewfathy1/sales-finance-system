@@ -1,0 +1,72 @@
+{% extends "core/base.html" %}
+
+{% block title %}Drive Finance | Portal Login{% endblock %}
+
+{% block main_class %}login-layout{% endblock %}
+
+{% block extra_css %}
+/* Specific Login Component Formatting Extensions */
+.login-card {
+    background: var(--surface);
+    width: 100%;
+    max-width: 400px;
+    padding: 2.5rem 2rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
+}
+.form-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; }
+.form-subtitle { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem; }
+
+.form-group { margin-bottom: 1.25rem; }
+label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; }
+input { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 0.375rem; font-size: 1rem; }
+input:focus { outline: none; border-color: var(--text-main); }
+
+.form-actions { display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; margin-bottom: 1.5rem; }
+.form-actions a { color: var(--primary); text-decoration: none; }
+
+.btn-submit {
+    width: 100%;
+    background: var(--text-main);
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+.btn-submit:hover { opacity: 0.9; }
+{% endblock %}
+
+{% block content %}
+<div class="login-card">
+    <h1 class="form-title">Welcome to Sales Portal</h1>
+    <p class="form-subtitle">Please enter your authorized credentials.</p>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p><br>
+    {% endif %}
+    <form method="POST" action="{% url 'employee-login' %}">
+        <!-- CSRF Token token slot for production setups -->
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="uid">Employee ID</label>
+            <input type="text" id="uid" name="username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+            <label for="pwd">Password</label>
+            <input type="password" id="pwd" name="password" required autocomplete="current-password">
+        </div>
+        <div class="form-actions">
+            <label style="display: flex; align-items: center; gap: 0.25rem; font-weight: normal;">
+                <input type="checkbox" name="remember_me" style="width:auto;"> Remember ID
+            </label>
+            <a href="#">Forgot Password?</a>
+        </div>
+        <button type="submit" class="btn-submit">Log In</button>
+    </form>
+</div>
+{% endblock %}

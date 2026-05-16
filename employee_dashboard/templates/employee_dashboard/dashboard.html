@@ -1,0 +1,150 @@
+{% extends "core/base_dashboard.html" %}
+
+{% block title %}Dashboard | Drive Finance{% endblock %}
+
+
+
+{% block dashboard_content %}
+<div class="dashboard-header-card">
+    <h1>{{ employee.full_name }}</h1>
+    <p>Corporate Hierarchy Overview</p>
+</div>
+
+<div class="dashboard-grid">
+
+    <!-- Employee Info -->
+    <div class="dashboard-card">
+        <h3>Employee Info</h3>
+        <div class="meta-list">
+            <p><strong>Employee ID:</strong> {{ employee.employee_id }}</p>
+            <p><strong>Manager ID:</strong> {{ employee.manager_id }}</p>
+            <p><strong>Territory ID:</strong> {{ employee.territory_id }}</p>
+        </div>
+    </div>
+
+    <!-- Rank -->
+    <div class="dashboard-card">
+        <h3>Your Rank</h3>
+        <div class="meta-list">
+            <p>{{ employee.hierarchy_level_id }}</p>
+        </div>
+    </div>
+
+    <!-- Reporting Chain -->
+    <div class="dashboard-card">
+        <h3>Reporting Chain</h3>
+        <ul class="meta-list">
+            {% for person in reporting_chain %}
+                <li>{{ person }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Territories -->
+    <div class="dashboard-card">
+        <h3>Your Territory Chain</h3>
+        <ul class="meta-list">
+            {% for territory in territory_chain %}
+                <li>{{ territory }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Customers Table -->
+    <div class="dashboard-card grid-span-full">
+        <h3>Customers</h3>
+        <div class="table-responsive">
+            <table class="customers-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %} 
+                    <tr>
+                        <td>{{ customer.name }}</td>
+                        <td>{{ customer.location }}</td>
+                        <td>{{ customer.status }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: var(--text-muted);">No assigned accounts.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block dashboard_extra_css %}
+<style>
+    /* Navigation Bar Components */
+    
+    .btn-logout:hover {
+        background-color: var(--error-bg);
+        border-color: #fee2e2;
+        color: var(--error-text);
+    }
+
+    /* Grid Distribution Structure */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        width: 100%;
+    }
+
+    .grid-span-full {
+        grid-column: 1 / -1;
+    }
+
+    /* List Layout Simplification */
+    .meta-list p,
+    .meta-list li {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        padding: 0.4rem 0;
+        border-bottom: 1px solid var(--border);
+        list-style: none;
+    }
+
+    .meta-list p:last-child,
+    .meta-list li:last-child {
+        border-bottom: none;
+    }
+
+    /* Table Element Architectures */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .customers-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .customers-table th,
+    .customers-table td {
+        padding: 0.75rem 0.6rem;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        font-size: 0.85rem;
+    }
+
+    .customers-table th {
+        color: var(--text-main);
+        font-weight: 600;
+    }
+
+    .customers-table tr:last-child td {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}

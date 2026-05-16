@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Drive Finance | Client Portal{% endblock %}</title>
+    <!-- Fixed missing package script name -->
+    <script src="unpkg.com"></script>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a; /* Darkened from pure black for premium typography */
+            --text-muted: #64748b;
+            --primary: #4f46e5; 
+            --primary-hover: #4338ca;
+            --header-bg: #ffffff;
+            --error-bg: #fef2f2;
+            --error-text: #991b1b;
+            --radius: 0.75rem; /* Increased for modern software aesthetic */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            letter-spacing: -0.01em;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .top-banner {
+            background-color: var(--text-main);
+            color: #ffffff;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 0.5rem 1.5rem;
+            letter-spacing: 0.05em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0.85rem 2rem; /* Reduced padding vertical scale */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+       .logo-container {
+            display: flex;
+            align-items: center;
+            height: 44px;      
+            overflow: visible;
+        }
+
+        .logo-container img {
+            height: 140px;    
+            width: auto;
+            display: block;
+            object-fit: contain;
+            transform: scale(1.6); 
+            margin-left: 1.5rem;  
+        }
+
+        
+        nav { display: flex; align-items: center; gap: 1.5rem; }
+        nav a { 
+            color: var(--text-muted); 
+            text-decoration: none; 
+            font-weight: 500; 
+            font-size: 0.9rem;
+            transition: color 0.15s ease;
+        }
+        nav a:hover { color: var(--text-main); }
+        
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 3rem 2rem; /* Clean responsive page padding */
+            max-width: 1240px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        /* Layout modifiers via template tags */
+        .login-layout { 
+            align-items: center; 
+            justify-content: center; 
+            max-width: 480px;
+        }
+        
+        .alert-error {
+            background-color: var(--error-bg);
+            color: var(--error-text);
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius);
+            border: 1px solid #fee2e2;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-preview {
+            background: var(--surface); 
+            padding: 3.5rem 2rem; 
+            border-radius: var(--radius); 
+            border: 1px solid var(--border); 
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-preview h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .card-preview p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            max-width: 500px;
+            margin: 0 auto;
+            line-repeat: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.75rem 2rem;
+            font-size: 0.825rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+            margin-top: auto;
+        }
+                /* App Layout Grid & Sidebar styling */
+        .app-layout {
+            display: flex;
+            gap: 2rem;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem 1rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-shrink: 0;
+            position: sticky;
+            top: calc(44px + 3rem); /* Keeps sidebar fixed when scrolling */
+        }
+
+        .sidebar h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            padding-left: 0.75rem;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.925rem;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease;
+        }
+
+        .sidebar-link:hover {
+            background-color: var(--bg);
+            color: var(--text-main);
+        }
+
+        /* Active styling for Django matching paths */
+        .sidebar-link.active {
+            background-color: #e0e7ff; /* Soft indigo tint */
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0; /* Prevents overflow bugs in layout boxes */
+        }
+
+         /* Navigation Bar Components */
+    .user-nav-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .user-welcome {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    .user-welcome strong {
+        color: var(--text-main);
+        font-weight: 600;
+    }
+
+    .btn-logout {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        padding: 0.4rem 0.85rem;
+        border-radius: 0.375rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .btn-logout:hover {
+        background-color: var(--error-bg);
+        border-color: #fee2e2;
+        color: var(--error-text);
+    }
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="https://gb-corporation.com/wp-content/uploads/2023/01/Drive-Finance_Logo-010.png" alt="Drive Finance Logo">
+            </div>
+            <nav>
+                {% block nav_links %}
+                <a href="#">Support</a>
+                {% endblock %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="{% block main_wrapper_class %}content-area{% endblock %} {% block main_class %}{% endblock %}">
+        {% block content %}
+        <div class="card-preview">
+            <h1>Drive Finance Master Layout</h1>
+            <p>Override this default viewport container structure within operational app domains.</p>
+        </div>
+        {% endblock %}
+    </main>
+
+    <footer>
+        <div class="header-container">
+            <p>&copy; 2026 Drive Finance. All rights reserved. Authorized corporate distribution channel only.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Check script availability before execution loop
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
