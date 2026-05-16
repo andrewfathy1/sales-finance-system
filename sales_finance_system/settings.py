@@ -124,7 +124,7 @@ STATIC_URL = 'static/'
 
 LOGIN_URL = 'employee-login'
 
-ALLOWED_HOSTS = ['.onrender.com']
+ALLOWED_HOSTS = ['*']
 
 
 STATIC_URL = '/static/'
